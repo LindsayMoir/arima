@@ -16,7 +16,7 @@ May 18, 2020
 
 ## Installation <a name="installation"></a>
 
-The code runs with Python version 3.6.3. There are a number of libraries required to run this notebook. Those are for and "regular libraries". Please go to the # import libraries cell which is near the top of the notebook and .py files for the definitive list.
+The code runs with Python version 3.6.3. There are a number of libraries required to run this notebook. Those are for ARIMA and "regular libraries". Please go to the # import libraries cell which is near the top of the notebook and .py files for the definitive list.
 
 
 ## Project Motivation<a name="motivation"></a>
