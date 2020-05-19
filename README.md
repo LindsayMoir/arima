@@ -16,7 +16,7 @@ May 18, 2020
 
 ## Installation <a name="installation"></a>
 
-The code runs with Python version 3.6.3. There are a number of libraries required to run this notebook. Those are for and "regular libraries". Please go to the # import libraries cell which is near the top of the notebook and .py files for the definitive list.
+The code runs with Python version 3.6.3. There are a number of libraries required to run this notebook. Those are for ARIMA and "regular libraries". Please go to the # import libraries cell which is near the top of the notebook and .py files for the definitive list.
 
 
 ## Project Motivation<a name="motivation"></a>
@@ -46,8 +46,8 @@ Update the John Hopkins, Covid-19 data https://github.com/CSSEGISandData/COVID-1
 - stationarity: 1) shows the raw data, 2) Runs ACF and PACF plots for suggesting initial values of ARIMA p,d,q values
 - arima_grid_search: 1) does a grid search and chooses the optimal pdq hyperparameters for the dataset based on the lowest RMSE.
 - summarize: 1) produces histograms and density plots that show the bias in the predictions. 2) reruns the predictions bias adjusted.
-- test_prediction_save_forecast_1day: 1) creates a plot that shows you the actual (test) vs the predicted (prediction) scores.
-- multi_step_forecast: 1) allows you to pick a date anytime in the future and predict the dependent_variable (e.g. deaths) up to that date.
+- test_prediction_save_forecast_1day: 1) creates a plot that shows you the actual (test) vs the predicted (prediction) scores. 2) provides a 1 day in the future forecast (e.g. tomorrow).
+- multi_step_forecast: 1) allows you to pick a date any time in the future and predict the dependent_variable (e.g. deaths) up to that date.
 
 All of the code and data required to run this notebook is in included in the GitHub repository.
 
