@@ -44,7 +44,7 @@ This repository allows you to quickly make predictions on deaths and confirmed c
 Update the John Hopkins, Covid-19 data https://github.com/CSSEGISandData/COVID-19 by refreshing your local copy of the GitHub repository. Please point the notebook titled arima_driver.ipynb at your local repository of that data. Simply edit the arg_dict for the jurisdictions and dependent_variable that you want to predict and the notebook will run by calling the following .py files in order.
 - load_data: 1) looks at the John Hopkins data and produces a DF suitable for the ARIMA model
 - stationarity: 1) shows the raw data, 2) Runs ACF and PACF plots for suggesting initial values of ARIMA p,d,q values
-- arima_grid_search: 1) does a grid search and chooses the optimal pdq hyperparameters for the dataset based on the lowest RMSE.
+- arima_grid_search: 1) does a grid search and chooses the optimal pdq hyper parameters for the dataset based on the lowest RMSE.
 - summarize: 1) produces histograms and density plots that show the bias in the predictions. 2) reruns the predictions bias adjusted.
 - test_prediction_save_forecast_1day: 1) creates a plot that shows you the actual (test) vs the predicted (prediction) scores. 2) provides a 1 day in the future forecast (e.g. tomorrow).
 - multi_step_forecast: 1) allows you to pick a date any time in the future and predict the dependent_variable (e.g. deaths) up to that date.
