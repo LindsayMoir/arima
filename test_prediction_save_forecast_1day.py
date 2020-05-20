@@ -25,7 +25,7 @@ def plot_test_vs_predictions(arg_dict):
     """Line plot of the test (actual) vs the ARIMA model predictions"""
     
     # Assemble title
-    title = ('Model Prediction of Test vs Predictions For Covid-19 ({}) For {} Days').format(
+    title = ('ARIMA Model Test vs Predictions For Covid-19 ({}) For {} Days').format(
         arg_dict['place'], len(arg_dict['test']))
     plt.title(title)
 

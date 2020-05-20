@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[22]:
+# In[26]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[23]:
+# In[27]:
 
 
 def place_value(number): 
@@ -28,7 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[24]:
+# In[28]:
 
 
 def difference(dataset, interval=1):
@@ -42,7 +42,7 @@ def difference(dataset, interval=1):
     return np.array(diff)
 
 
-# In[25]:
+# In[29]:
 
 
 def inverse_difference(history, yhat, interval=1):
@@ -51,7 +51,7 @@ def inverse_difference(history, yhat, interval=1):
     return yhat + history[-interval]
 
 
-# In[26]:
+# In[33]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -67,6 +67,9 @@ def forecast_multi_step(df, arg_dict):
     X = series.values
     period = int(X.shape[0]/2)
     differenced = difference(X, period)
+    
+    # The above may introduce some NaNs
+    differenced = differenced[~np.isnan(differenced)]
 
     # fit model
     model = ARIMA(differenced, order=(arg_dict['best_cfg'])) 
@@ -106,7 +109,7 @@ def forecast_multi_step(df, arg_dict):
     return forecast_df
 
 
-# In[40]:
+# In[34]:
 
 
 def forecast(forecast_df, arg_dict):
@@ -117,33 +120,35 @@ def forecast(forecast_df, arg_dict):
     print(f'The {arg_dict["place"]} prediction is for {predicted} cumulative {arg_dict["dependent_variable"]} to occur by {forecast_date}')
 
 
-# In[53]:
+# In[38]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
     """Plot the multi step forecast"""
     
-    # Add a new column that is Deaths_e6 (deaths per million)
+    # Add a new column that is dependent_variable per million
     forecast_df[arg_dict['dependent_variable'] + '_e6'] = forecast_df[arg_dict['dependent_variable']] / 1000000
 
     # Assemble title
     start = forecast_df.index[0].strftime('%Y-%m-%d')
-    title = ('{} Forecast Cumulative {} In Millions For Covid-19 ({} to {})').format(
+    title = ('Forecast Cumulative {} for {} In Millions For Covid-19 ({} to {})').format(
         arg_dict['dependent_variable'], arg_dict['place'], start, arg_dict['date'])
     plt.title(title)
 
     # Create x and y axis labels
     plt.xlabel('Date')
-    plt.ylabel('Cumulative Deaths In Millions')
+    ylabel_ = ('Cumulative {} In Millions').format(arg_dict['dependent_variable'])
+    plt.ylabel(ylabel_)
 
     # Create plot
-    plt.plot('Deaths_e6', data=forecast_df, linewidth=4, label='Deaths')
+    plt.plot(arg_dict['dependent_variable'] + '_e6', data=forecast_df, linewidth=4, 
+             label=arg_dict['dependent_variable'] + '_e6')
     plt.legend()
     plt.savefig(r'pics/' + arg_dict['place'] + '_prediction.png');
     
 
 
-# In[54]:
+# In[39]:
 
 
 def driver(df, arg_dict):
@@ -161,7 +166,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[55]:
+# In[40]:
 
 
 if __name__ == '__main__':
