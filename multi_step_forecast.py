@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[26]:
+# In[178]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[27]:
+# In[179]:
 
 
 def place_value(number): 
@@ -28,7 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[28]:
+# In[180]:
 
 
 def difference(dataset, interval=1):
@@ -42,16 +42,17 @@ def difference(dataset, interval=1):
     return np.array(diff)
 
 
-# In[29]:
+# In[181]:
 
 
-def inverse_difference(history, yhat, interval=1):
+def inverse_difference(arg_dict, history, yhat, interval=1):
     """invert differenced value"""
     
-    return yhat + history[-interval]
+    # Include bias from previous optimization runs
+    return yhat + arg_dict['bias'] + history[-interval]
 
 
-# In[33]:
+# In[182]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -63,9 +64,10 @@ def forecast_multi_step(df, arg_dict):
     # This algorithm accommodates seasonal variation which may be helpful if there is a season to covid.
     # Flu season runs from November thru March with a peak in December and February each year.
     # This is for the northern hemisphere. Obviously the opposite for the southern hemisphere.
-    # To get the maximum information into the model currently use length /2.
+    # To simply ignore seasonality set period to 1
     X = series.values
-    period = int(X.shape[0]/2)
+    #period = int(X.shape[0]/2)
+    period = 1
     differenced = difference(X, period)
     
     # The above may introduce some NaNs
@@ -90,7 +92,7 @@ def forecast_multi_step(df, arg_dict):
 
     for day, yhat in enumerate(forecast):
 
-        inverted = inverse_difference(history, yhat, period)
+        inverted = inverse_difference(arg_dict, history, yhat, period)
         history.append(inverted)
         inverted_.append(int(inverted))
 
@@ -109,18 +111,42 @@ def forecast_multi_step(df, arg_dict):
     return forecast_df
 
 
-# In[34]:
+# In[183]:
 
 
 def forecast(forecast_df, arg_dict):
     """Print out the prediction in a readable format"""
     
+    # Some countries are flattening the curve. As a result ARIMA will forecast fewer 'Deaths'.
+    # Then the cumulative numbers start decreasing and will go negative. Lets catch that here.
+    
+    # Just want a normal integer index
+    forecast_df.reset_index(inplace=True)
+    forecast_df.rename(columns={'index': 'Date_'}, inplace=True)
+
+    # Get max values
+    max_forecast = forecast_df[arg_dict['dependent_variable']].max()
+    idx_max = forecast_df[arg_dict['dependent_variable']].idxmax()
+    last_forecast = forecast_df[arg_dict['dependent_variable']].iloc[-1]
+
+    if last_forecast < max_forecast:
+        # Truncate forecast_df
+        forecast_df = forecast_df.loc[:idx_max+1]
+    else:
+        pass
+
     predicted = place_value(int(forecast_df[arg_dict['dependent_variable']].iloc[-1]))
-    forecast_date = forecast_df.index[-1].strftime('%Y-%m-%d')
+    forecast_date = forecast_df['Date_'].iloc[-1]
     print(f'The {arg_dict["place"]} prediction is for {predicted} cumulative {arg_dict["dependent_variable"]} to occur by {forecast_date}')
 
+    # Make Date_ the index again for plotting purposes
+    forecast_df.set_index('Date_', drop='Date_', inplace=True)
 
-# In[38]:
+    return forecast_df
+          
+
+
+# In[184]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
@@ -131,8 +157,9 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
 
     # Assemble title
     start = forecast_df.index[0].strftime('%Y-%m-%d')
-    title = ('Forecast Cumulative {} for {} In Millions For Covid-19 ({} to {})').format(
-        arg_dict['dependent_variable'], arg_dict['place'], start, arg_dict['date'])
+    end = forecast_df.index[-1].strftime('%Y-%m-%d')
+    title = ('Forecast Cumulative {} for {} In Millions From {} to {}').format(
+        arg_dict['dependent_variable'], arg_dict['place'], start, end)
     plt.title(title)
 
     # Create x and y axis labels
@@ -148,7 +175,7 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
     
 
 
-# In[39]:
+# In[185]:
 
 
 def driver(df, arg_dict):
@@ -158,7 +185,7 @@ def driver(df, arg_dict):
     forecast_df = forecast_multi_step(df, arg_dict)
     
     # Report on results
-    forecast(forecast_df, arg_dict)
+    forecast_df = forecast(forecast_df, arg_dict)
     
     # Plot results
     plot_multi_step_forecast(forecast_df, arg_dict)
@@ -166,7 +193,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[40]:
+# In[186]:
 
 
 if __name__ == '__main__':
@@ -175,7 +202,6 @@ if __name__ == '__main__':
     with open('arg_dict.pickle', 'rb') as handle:
         arg_dict = pickle.load(handle)
     
-    arg_dict.update({'date': '12-31-2020'})
     df = pd.read_csv('df.csv', parse_dates=True, index_col='Date_')
     
     # Start driver

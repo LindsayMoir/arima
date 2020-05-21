@@ -3,7 +3,7 @@
 
 # Test vs predictions, 1 day forecast with ARIMA.
 
-# In[1]:
+# In[9]:
 
 
 # import libraries
@@ -18,15 +18,15 @@ from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
-# In[2]:
+# In[10]:
 
 
 def plot_test_vs_predictions(arg_dict):
     """Line plot of the test (actual) vs the ARIMA model predictions"""
     
     # Assemble title
-    title = ('ARIMA Model Test vs Predictions For Covid-19 ({}) For {} Days').format(
-        arg_dict['place'], len(arg_dict['test']))
+    title = ('ARIMA Model Test vs Predictions For {} ({}) For {} Days').format(
+        arg_dict['dependent_variable'], arg_dict['place'], len(arg_dict['test']))
     plt.title(title)
 
     # Create x and y axis labels
@@ -42,7 +42,7 @@ def plot_test_vs_predictions(arg_dict):
     
 
 
-# In[3]:
+# In[11]:
 
 
 def __getnewargs__(self):
@@ -51,7 +51,7 @@ def __getnewargs__(self):
     return ((self.endog),(self.k_lags, self.k_diff, self.k_ma))
 
 
-# In[4]:
+# In[12]:
 
 
 def save_model_data(arg_dict):
@@ -65,7 +65,7 @@ def save_model_data(arg_dict):
     
 
 
-# In[5]:
+# In[13]:
 
 
 def place_value(number): 
@@ -76,7 +76,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[6]:
+# In[14]:
 
 
 def forecast_1day(arg_dict):
@@ -91,7 +91,7 @@ def forecast_1day(arg_dict):
     print(f"The predicted cumulative {arg_dict['dependent_variable']} for {arg_dict['place']} for tomorrow (input data plus 1 day) are {place_value(yhat)}")
 
 
-# In[7]:
+# In[15]:
 
 
 def driver(arg_dict):
@@ -107,7 +107,7 @@ def driver(arg_dict):
     forecast_1day(arg_dict)
 
 
-# In[8]:
+# In[16]:
 
 
 if __name__ == '__main__':
