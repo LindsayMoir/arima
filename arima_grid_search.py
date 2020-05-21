@@ -3,7 +3,7 @@
 
 # This notebook grid searchs for the best model for ARIMA based on the dataset.
 
-# In[2]:
+# In[8]:
 
 
 # import libraries
@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 
-# In[3]:
+# In[9]:
 
 
 def evaluate_arima_model(X, arima_order):
@@ -52,7 +52,7 @@ def evaluate_arima_model(X, arima_order):
     return rmse
 
 
-# In[4]:
+# In[10]:
 
 
 def evaluate_models(dataset, p_values, d_values, q_values):
@@ -77,7 +77,7 @@ def evaluate_models(dataset, p_values, d_values, q_values):
     return best_cfg
 
 
-# In[5]:
+# In[11]:
 
 
 def driver(df, arg_dict):
@@ -95,7 +95,7 @@ def driver(df, arg_dict):
     return best_cfg
 
 
-# In[7]:
+# In[12]:
 
 
 if __name__ == '__main__':
