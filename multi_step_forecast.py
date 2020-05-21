@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[178]:
+# In[245]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[179]:
+# In[246]:
 
 
 def place_value(number): 
@@ -28,31 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[180]:
-
-
-def difference(dataset, interval=1):
-    """create a differenced series"""
-    
-    diff = []
-    for i in range(interval, len(dataset)):
-        value = dataset[i] - dataset[i - interval]
-        diff.append(value)
-        
-    return np.array(diff)
-
-
-# In[181]:
-
-
-def inverse_difference(arg_dict, history, yhat, interval=1):
-    """invert differenced value"""
-    
-    # Include bias from previous optimization runs
-    return yhat + arg_dict['bias'] + history[-interval]
-
-
-# In[182]:
+# In[247]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -60,23 +36,12 @@ def forecast_multi_step(df, arg_dict):
     
     # load dataset
     series = df[arg_dict['dependent_variable']]
-
-    # This algorithm accommodates seasonal variation which may be helpful if there is a season to covid.
-    # Flu season runs from November thru March with a peak in December and February each year.
-    # This is for the northern hemisphere. Obviously the opposite for the southern hemisphere.
-    # To simply ignore seasonality set period to 1
     X = series.values
-    #period = int(X.shape[0]/2)
-    period = 1
-    differenced = difference(X, period)
-    
-    # The above may introduce some NaNs
-    differenced = differenced[~np.isnan(differenced)]
 
     # fit model
-    model = ARIMA(differenced, order=(arg_dict['best_cfg'])) 
+    model = ARIMA(X, order=(arg_dict['best_cfg'])) 
     model_fit = model.fit(disp=0)
-
+    
     # Create time period to report on
     start = df.index[-1]
     end = pd.to_datetime(arg_dict['date'], infer_datetime_format=True)
@@ -86,15 +51,12 @@ def forecast_multi_step(df, arg_dict):
     # Fit the out of sample
     forecast = model_fit.forecast(steps=steps)[0]
 
-    # invert the differenced forecast to something usable
-    history = [x for x in X]
-    inverted_ = []
+    # Add the bias
+    predictions = []
+    for yhat in forecast:
 
-    for day, yhat in enumerate(forecast):
-
-        inverted = inverse_difference(arg_dict, history, yhat, period)
-        history.append(inverted)
-        inverted_.append(int(inverted))
+        yhat = arg_dict['bias'] + yhat
+        predictions.append(yhat)
 
     # Create a df for reporting
     # Create a date_range index
@@ -102,7 +64,7 @@ def forecast_multi_step(df, arg_dict):
     end = start + timedelta(days=steps-1)
 
     # Create the df
-    forecast_df = pd.DataFrame({arg_dict['dependent_variable']: inverted_}, index=pd.date_range(start=start, end=end))
+    forecast_df = pd.DataFrame({arg_dict['dependent_variable']: predictions}, index=pd.date_range(start=start, end=end))
 
     # Shift Deaths by one day to make it lineup correctly with the date. 
     forecast_df[arg_dict['dependent_variable']] = forecast_df[arg_dict['dependent_variable']].shift(1)
@@ -111,7 +73,7 @@ def forecast_multi_step(df, arg_dict):
     return forecast_df
 
 
-# In[183]:
+# In[248]:
 
 
 def forecast(forecast_df, arg_dict):
@@ -146,19 +108,16 @@ def forecast(forecast_df, arg_dict):
           
 
 
-# In[184]:
+# In[249]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
     """Plot the multi step forecast"""
-    
-    # Add a new column that is dependent_variable per million
-    forecast_df[arg_dict['dependent_variable'] + '_e6'] = forecast_df[arg_dict['dependent_variable']] / 1000000
 
     # Assemble title
     start = forecast_df.index[0].strftime('%Y-%m-%d')
     end = forecast_df.index[-1].strftime('%Y-%m-%d')
-    title = ('Forecast Cumulative {} for {} In Millions From {} to {}').format(
+    title = ('Forecast Cumulative {} for {} From {} to {}').format(
         arg_dict['dependent_variable'], arg_dict['place'], start, end)
     plt.title(title)
 
@@ -168,14 +127,14 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
     plt.ylabel(ylabel_)
 
     # Create plot
-    plt.plot(arg_dict['dependent_variable'] + '_e6', data=forecast_df, linewidth=4, 
-             label=arg_dict['dependent_variable'] + '_e6')
+    plt.plot(arg_dict['dependent_variable'], data=forecast_df, linewidth=4, 
+             label=arg_dict['dependent_variable'])
     plt.legend()
     plt.savefig(r'pics/' + arg_dict['place'] + '_prediction.png');
     
 
 
-# In[185]:
+# In[250]:
 
 
 def driver(df, arg_dict):
@@ -193,7 +152,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[186]:
+# In[251]:
 
 
 if __name__ == '__main__':

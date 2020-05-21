@@ -3,7 +3,7 @@
 
 # Summarize residual errors for an ARIMA model
 
-# In[10]:
+# In[37]:
 
 
 # import libraries
@@ -13,12 +13,13 @@ import matplotlib.pyplot as plt
 plt.rcParams['figure.figsize'] = (12,8)
 import numpy as np
 import pandas as pd
+import pickle
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima_model import ARIMA
 import warnings
 
 
-# In[11]:
+# In[38]:
 
 
 def load_prepare(df, arg_dict):
@@ -34,7 +35,7 @@ def load_prepare(df, arg_dict):
     return X
 
 
-# In[12]:
+# In[39]:
 
 
 def train_test_spit(X, arg_dict):
@@ -46,7 +47,7 @@ def train_test_spit(X, arg_dict):
     return train, test
 
 
-# In[13]:
+# In[40]:
 
 
 def walk_forward_validation(train, test, arg_dict):
@@ -68,10 +69,10 @@ def walk_forward_validation(train, test, arg_dict):
         obs = test[i]
         history.append(obs)
         
-    return predictions, history, model_fit
+    return model_fit, predictions, history
 
 
-# In[14]:
+# In[41]:
 
 
 def errors(test, predictions):
@@ -89,7 +90,7 @@ def errors(test, predictions):
     return residuals
 
 
-# In[15]:
+# In[42]:
 
 
 def plot_residuals(residuals):
@@ -105,21 +106,26 @@ def plot_residuals(residuals):
     
 
 
-# In[16]:
+# In[43]:
 
 
-def calc_bias(residuals):
+def calc_bias(arg_dict, residuals):
     """Save the bias for a subsequent run"""
     
+    # Get bias
     bias = residuals.describe()
     bias = bias.iloc[1][0]
     
-    print('\nbias saved in arg_dict["bias"] for subsequent run is:', bias, '\n')
+    # Print appropriate message
+    if arg_dict['bias'] == 0:
+        arg_dict.update({'bias': bias})
+        print('\nbias IS saved in arg_dict["bias"] for subsequent run is:', bias, '\n')
+    else:
+        print('\nbias NOT saved in arg_dict["bias"] for subsequent run is:', bias, '\n')
     
-    return bias
 
 
-# In[17]:
+# In[44]:
 
 
 def driver(df, arg_dict):
@@ -132,7 +138,7 @@ def driver(df, arg_dict):
     train, test = train_test_spit(X, arg_dict)
 
     # walk-forward validation
-    predictions, history, model_fit = walk_forward_validation(train, test, arg_dict)
+    model_fit, predictions, history = walk_forward_validation(train, test, arg_dict)
     
     # Calculate the errors that occurred between actual and predicted
     residuals = errors(test, predictions)
@@ -141,31 +147,24 @@ def driver(df, arg_dict):
     plot_residuals(residuals)
     
     # Save the bias for a subsequent run
-    bias = calc_bias(residuals)
+    calc_bias(arg_dict, residuals)
     
-    return bias, test, predictions, model_fit
+    return model_fit, test, predictions
 
 
-# In[19]:
+# In[45]:
 
 
 if __name__ == '__main__':
     
     # Prepare arguments for driver
-    arg_dict = {'file_name_1': r'data\all_df.csv',
-                'file_name_2': r'C:\Users\linds\OneDrive\mystuff\GitHub\covid\data\country_codes_edited.csv',
-                'feature': 'Alpha_3',
-                'place': 'USA',
-                'dependent_variable': 'Deaths',
-                'path': r'C:\Users\linds\OneDrive\mystuff\GitHub\COVID-19\csse_covid_19_data\csse_covid_19_daily_reports',
-                'split_value': .5,
-                'best_cfg': (1,0,0),
-                'bias': 0}
+    with open('arg_dict.pickle', 'rb') as handle:
+        arg_dict = pickle.load(handle)
     
     df = pd.read_csv('df.csv')
     
     # Start driver
-    bias, test, predictions, model_fit = driver(df, arg_dict) 
+    model_fit, test, predictions = driver(df, arg_dict) 
     
 
 
