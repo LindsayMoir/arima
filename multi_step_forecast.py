@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[245]:
+# In[254]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[246]:
+# In[255]:
 
 
 def place_value(number): 
@@ -28,7 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[247]:
+# In[256]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -56,6 +56,7 @@ def forecast_multi_step(df, arg_dict):
     for yhat in forecast:
 
         yhat = arg_dict['bias'] + yhat
+        yhat = int(yhat)
         predictions.append(yhat)
 
     # Create a df for reporting
@@ -73,7 +74,7 @@ def forecast_multi_step(df, arg_dict):
     return forecast_df
 
 
-# In[248]:
+# In[257]:
 
 
 def forecast(forecast_df, arg_dict):
@@ -108,7 +109,7 @@ def forecast(forecast_df, arg_dict):
           
 
 
-# In[249]:
+# In[258]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
@@ -134,7 +135,7 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
     
 
 
-# In[250]:
+# In[259]:
 
 
 def driver(df, arg_dict):
@@ -152,7 +153,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[251]:
+# In[260]:
 
 
 if __name__ == '__main__':
