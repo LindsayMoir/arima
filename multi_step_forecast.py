@@ -124,7 +124,7 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
 
     # Create x and y axis labels
     plt.xlabel('Date')
-    ylabel_ = ('Cumulative {} In Millions').format(arg_dict['dependent_variable'])
+    ylabel_ = ('Cumulative {}').format(arg_dict['dependent_variable'])
     plt.ylabel(ylabel_)
 
     # Create plot
