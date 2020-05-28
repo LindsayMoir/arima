@@ -3,7 +3,7 @@
 
 # Test vs predictions, 1 day forecast with ARIMA.
 
-# In[9]:
+# In[17]:
 
 
 # import libraries
@@ -18,7 +18,7 @@ from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.arima_model import ARIMAResults
 
 
-# In[10]:
+# In[18]:
 
 
 def plot_test_vs_predictions(arg_dict):
@@ -42,7 +42,7 @@ def plot_test_vs_predictions(arg_dict):
     
 
 
-# In[11]:
+# In[19]:
 
 
 def __getnewargs__(self):
@@ -51,7 +51,7 @@ def __getnewargs__(self):
     return ((self.endog),(self.k_lags, self.k_diff, self.k_ma))
 
 
-# In[12]:
+# In[20]:
 
 
 def save_model_data(arg_dict):
@@ -65,7 +65,7 @@ def save_model_data(arg_dict):
     
 
 
-# In[13]:
+# In[21]:
 
 
 def place_value(number): 
@@ -76,7 +76,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[14]:
+# In[22]:
 
 
 def forecast_1day(arg_dict):
@@ -91,7 +91,7 @@ def forecast_1day(arg_dict):
     print(f"The predicted cumulative {arg_dict['dependent_variable']} for {arg_dict['place']} for tomorrow (input data plus 1 day) are {place_value(yhat)}")
 
 
-# In[15]:
+# In[23]:
 
 
 def driver(arg_dict):
@@ -107,7 +107,7 @@ def driver(arg_dict):
     forecast_1day(arg_dict)
 
 
-# In[16]:
+# In[24]:
 
 
 if __name__ == '__main__':
