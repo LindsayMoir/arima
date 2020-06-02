@@ -3,7 +3,7 @@
 
 # I want code that I can reuse for arbitrary jurisdictions that are contained in the John Hopkins data. Those 3 fields are Admin2, Province_State, and Country_Region.
 
-# In[3]:
+# In[26]:
 
 
 # import libraries
@@ -16,7 +16,7 @@ from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.stattools import adfuller
 
 
-# In[4]:
+# In[27]:
 
 
 def data_merge(arg_dict):
@@ -38,7 +38,7 @@ def data_merge(arg_dict):
     return df_cc
 
 
-# In[5]:
+# In[28]:
 
 
 def restrict_column_place(df, arg_dict):
@@ -64,7 +64,7 @@ def restrict_column_place(df, arg_dict):
     return df_gb
 
 
-# In[6]:
+# In[29]:
 
 
 def data_clean(df, arg_dict):
@@ -76,42 +76,21 @@ def data_clean(df, arg_dict):
     return df
 
 
-# In[7]:
+# In[30]:
 
 
 def load_prepare(df, arg_dict):
-    """Load the data, create a series, extract the numeric values, and convert to integer"""
-
-    # Load the data 
-    series = df[arg_dict['dependent_variable']]
-
-    # Convert it to an array
-    X = series.values
-    X = X.astype('float32')
+    """Load the data, difference, and return series"""
     
-    # difference the data
-    stationary = difference(X)
-    stationary.index = series.index[1:]
+    # difference the data using shift
+    new_col = "Daily_" + arg_dict['dependent_variable']
+    df[new_col] = df[arg_dict['dependent_variable']] - df[arg_dict['dependent_variable']].shift()
 
-    # return the series
-    return stationary
-
-
-# In[8]:
+    # return the series, except for first row which is NaN
+    return df[new_col][1:]
 
 
-def difference(dataset):
-    """Create a difference between first value and the second value in the input"""
-
-    diff = []
-    for i in range(1, len(dataset)):
-        value = dataset[i] - dataset[i - 1]
-        diff.append(value)
-
-    return pd.Series(diff)
-
-
-# In[9]:
+# In[32]:
 
 
 def check_stationary(stationary, arg_dict):
@@ -128,7 +107,7 @@ def check_stationary(stationary, arg_dict):
     # plot differenced data
     stationary.plot()
     plt.ylabel(arg_dict['dependent_variable'])
-    plt.title('Raw Undifferenced Data')
+    plt.title('Differenced Data')
     plt.show();
 
     # save
@@ -136,7 +115,7 @@ def check_stationary(stationary, arg_dict):
     
 
 
-# In[10]:
+# In[33]:
 
 
 def acf_pacf_plots(series):
@@ -150,7 +129,7 @@ def acf_pacf_plots(series):
     plt.show()
 
 
-# In[11]:
+# In[34]:
 
 
 def driver(arg_dict):
@@ -178,7 +157,7 @@ def driver(arg_dict):
     return df
 
 
-# In[12]:
+# In[35]:
 
 
 if __name__ == '__main__':
