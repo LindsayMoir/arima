@@ -85,6 +85,7 @@ def errors(test, predictions):
     # calculate residual errors
     residuals = [test[i]-predictions[i] for i in range(len(test))]
     residuals = pd.DataFrame(residuals)
+    residuals = residuals.rename({0: 'Residual Statistics'}, axis=1)
     print(residuals.describe())
     
     return residuals
