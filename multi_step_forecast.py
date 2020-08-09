@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[16]:
+# In[13]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[17]:
+# In[14]:
 
 
 def place_value(number): 
@@ -28,7 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[18]:
+# In[15]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -39,47 +39,49 @@ def forecast_multi_step(df, arg_dict):
     X = series.values
     
     # fit model
-    for order in arg_dict['order_list']:
+    for idx, order in enumerate(arg_dict['order_list']):
+        
         try:
             model = ARIMA(X, order=order) 
             model_fit = model.fit(disp=0)
-    
-            # Create time period to report on
-            start = df.index[-1]
-            end = pd.to_datetime(arg_dict['date'], infer_datetime_format=True)
-            steps = end - start
-            steps = (steps.days) + 1 # Add 1 day
-
-            # Fit the out of sample
-            forecast = model_fit.forecast(steps=steps)[0]
-
-            # Add the bias
-            predictions = []
-            for yhat in forecast:
-
-                yhat = arg_dict['bias'] + yhat
-                yhat = int(yhat)
-                predictions.append(yhat)
-
-            # Create a df for reporting
-            # Create a date_range index
-            start = df.index[-1]
-            end = start + timedelta(days=steps-1)
-
-            # Create the df
-            forecast_df = pd.DataFrame({arg_dict['dependent_variable']: predictions}, index=pd.date_range(start=start, end=end))
-
-            # Shift Deaths by one day to make it lineup correctly with the date. 
-            forecast_df[arg_dict['dependent_variable']] = forecast_df[arg_dict['dependent_variable']].shift(1)
-            forecast_df = forecast_df[1:]
-
-            return forecast_df
-    
         except:
-            print('Order', order, 'did not work. Now trying the next best order.')
+            print(f"Order {order} did not work. Now trying {arg_dict['order_list'][idx+1]}")
+    
+    # Create time period to report on
+    start = df.index[-1]
+    end = pd.to_datetime(arg_dict['date'], infer_datetime_format=True)
+    steps = end - start
+    steps = (steps.days) + 1 # Add 1 day
+
+    # Fit the out of sample
+    forecast = model_fit.forecast(steps=steps)[0]
+
+    # Add the bias
+    predictions = []
+    for yhat in forecast:
+
+        yhat = arg_dict['bias'] + yhat
+        yhat = int(yhat)
+        predictions.append(yhat)
+
+    # Create a df for reporting
+    # Create a date_range index
+    start = df.index[-1]
+    end = start + timedelta(days=steps-1)
+
+    # Create the df
+    forecast_df = pd.DataFrame({arg_dict['dependent_variable']: predictions}, index=pd.date_range(start=start, end=end))
+
+    # Shift Deaths by one day to make it lineup correctly with the date. 
+    forecast_df[arg_dict['dependent_variable']] = forecast_df[arg_dict['dependent_variable']].shift(1)
+    forecast_df = forecast_df[1:]
+
+    return forecast_df
+    
+        
 
 
-# In[19]:
+# In[16]:
 
 
 def forecast(forecast_df, arg_dict):
@@ -114,7 +116,7 @@ def forecast(forecast_df, arg_dict):
           
 
 
-# In[20]:
+# In[17]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
@@ -140,7 +142,7 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
     
 
 
-# In[21]:
+# In[18]:
 
 
 def driver(df, arg_dict):
@@ -158,7 +160,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[22]:
+# In[19]:
 
 
 if __name__ == '__main__':
