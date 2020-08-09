@@ -3,7 +3,7 @@
 
 # Summarize residual errors for an ARIMA model
 
-# In[37]:
+# In[1]:
 
 
 # import libraries
@@ -19,7 +19,7 @@ from statsmodels.tsa.arima_model import ARIMA
 import warnings
 
 
-# In[38]:
+# In[2]:
 
 
 def load_prepare(df, arg_dict):
@@ -35,7 +35,7 @@ def load_prepare(df, arg_dict):
     return X
 
 
-# In[39]:
+# In[3]:
 
 
 def train_test_spit(X, arg_dict):
@@ -47,7 +47,7 @@ def train_test_spit(X, arg_dict):
     return train, test
 
 
-# In[40]:
+# In[4]:
 
 
 def walk_forward_validation(train, test, arg_dict):
@@ -72,7 +72,7 @@ def walk_forward_validation(train, test, arg_dict):
     return model_fit, predictions, history
 
 
-# In[41]:
+# In[5]:
 
 
 def errors(test, predictions):
@@ -80,7 +80,7 @@ def errors(test, predictions):
     
     # report performance
     rmse = sqrt(mean_squared_error(test, predictions))
-    print('RMSE: %.3f' % rmse)
+    print('\nRMSE: %.3f' % rmse)
     
     # calculate residual errors
     residuals = [test[i]-predictions[i] for i in range(len(test))]
@@ -91,7 +91,7 @@ def errors(test, predictions):
     return residuals
 
 
-# In[42]:
+# In[6]:
 
 
 def plot_residuals(residuals):
@@ -107,7 +107,7 @@ def plot_residuals(residuals):
     
 
 
-# In[43]:
+# In[7]:
 
 
 def calc_bias(arg_dict, residuals):
@@ -126,7 +126,7 @@ def calc_bias(arg_dict, residuals):
     
 
 
-# In[44]:
+# In[8]:
 
 
 def driver(df, arg_dict):
@@ -153,7 +153,7 @@ def driver(df, arg_dict):
     return model_fit, test, predictions
 
 
-# In[45]:
+# In[9]:
 
 
 if __name__ == '__main__':
