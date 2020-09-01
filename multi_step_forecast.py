@@ -3,7 +3,7 @@
 
 # Multi Step Forecast with ARIMA.
 
-# In[13]:
+# In[21]:
 
 
 # import libraries
@@ -17,7 +17,7 @@ import pickle
 from statsmodels.tsa.arima_model import ARIMA
 
 
-# In[14]:
+# In[22]:
 
 
 def place_value(number): 
@@ -28,7 +28,7 @@ def place_value(number):
     return ("{:,}".format(number))
 
 
-# In[15]:
+# In[23]:
 
 
 def forecast_multi_step(df, arg_dict):
@@ -44,6 +44,7 @@ def forecast_multi_step(df, arg_dict):
         try:
             model = ARIMA(X, order=order) 
             model_fit = model.fit(disp=0)
+            break # means we have success with fitting the model
         except:
             print(f"Order {order} did not work. Now trying {arg_dict['order_list'][idx+1]}")
     
@@ -78,10 +79,9 @@ def forecast_multi_step(df, arg_dict):
 
     return forecast_df
     
-        
 
 
-# In[16]:
+# In[24]:
 
 
 def forecast(forecast_df, arg_dict):
@@ -116,7 +116,7 @@ def forecast(forecast_df, arg_dict):
           
 
 
-# In[17]:
+# In[25]:
 
 
 def plot_multi_step_forecast(forecast_df, arg_dict):
@@ -142,7 +142,7 @@ def plot_multi_step_forecast(forecast_df, arg_dict):
     
 
 
-# In[18]:
+# In[26]:
 
 
 def driver(df, arg_dict):
@@ -160,7 +160,7 @@ def driver(df, arg_dict):
     return forecast_df
 
 
-# In[19]:
+# In[27]:
 
 
 if __name__ == '__main__':

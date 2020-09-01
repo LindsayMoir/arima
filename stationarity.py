@@ -3,7 +3,7 @@
 
 # I want code that I can reuse for arbitrary jurisdictions that are contained in the John Hopkins data. Those 3 fields are Admin2, Province_State, and Country_Region.
 
-# In[26]:
+# In[1]:
 
 
 # import libraries
@@ -16,7 +16,7 @@ from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.stattools import adfuller
 
 
-# In[27]:
+# In[2]:
 
 
 def data_merge(arg_dict):
@@ -38,7 +38,7 @@ def data_merge(arg_dict):
     return df_cc
 
 
-# In[28]:
+# In[3]:
 
 
 def restrict_column_place(df, arg_dict):
@@ -64,7 +64,7 @@ def restrict_column_place(df, arg_dict):
     return df_gb
 
 
-# In[29]:
+# In[4]:
 
 
 def data_clean(df, arg_dict):
@@ -76,7 +76,7 @@ def data_clean(df, arg_dict):
     return df
 
 
-# In[30]:
+# In[5]:
 
 
 def load_prepare(df, arg_dict):
@@ -90,7 +90,7 @@ def load_prepare(df, arg_dict):
     return df[new_col][1:]
 
 
-# In[32]:
+# In[6]:
 
 
 def check_stationary(stationary, arg_dict):
@@ -111,11 +111,11 @@ def check_stationary(stationary, arg_dict):
     plt.show();
 
     # save
-    stationary.to_csv(r'data/stationary.csv')
+    stationary.to_csv(r'data/stationary.csv', header=False)
     
 
 
-# In[33]:
+# In[7]:
 
 
 def acf_pacf_plots(series):
@@ -129,7 +129,7 @@ def acf_pacf_plots(series):
     plt.show()
 
 
-# In[34]:
+# In[8]:
 
 
 def driver(arg_dict):
@@ -157,7 +157,7 @@ def driver(arg_dict):
     return df
 
 
-# In[35]:
+# In[9]:
 
 
 if __name__ == '__main__':

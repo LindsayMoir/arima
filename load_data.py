@@ -3,7 +3,7 @@
 
 # This code loads the data from the John Hopkins dataset. The best way is to make sure that you have the current version of the data by cloning the repository from John Hokins at this url https://github.com/CSSEGISandData/COVID-19
 
-# In[47]:
+# In[2]:
 
 
 # import required libraries
@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-# In[48]:
+# In[3]:
 
 
 def get_all_columns(arg_dict):
@@ -31,7 +31,7 @@ def get_all_columns(arg_dict):
     return li_set, df.columns
 
 
-# In[49]:
+# In[4]:
 
 
 def get_data(all_df_cols, arg_dict):
@@ -67,10 +67,10 @@ def get_data(all_df_cols, arg_dict):
             # append df to li
             li.append(df)
 
-    return pd.concat(li)
+    return pd.concat(li, sort=True)
 
 
-# In[50]:
+# In[5]:
 
 
 def short_df(df, temp_df):
@@ -94,7 +94,7 @@ def short_df(df, temp_df):
     return temp_df
 
 
-# In[51]:
+# In[6]:
 
 
 def fix_date_index_write(all_df, arg_dict):
@@ -112,19 +112,26 @@ def fix_date_index_write(all_df, arg_dict):
     return all_df
 
 
-# In[52]:
+# In[7]:
 
 
 def driver(arg_dict):
+    """Driver program"""
     
+    # Columns are changing over time. Get the right column names.
     li_set, all_df_cols = get_all_columns(arg_dict)
+    
+    # Get all of the csv files in the right format and return the df
     df = get_data(all_df_cols, arg_dict)
+    
+    # A couple of fixes required to the data
     df = fix_date_index_write(df, arg_dict)
     
+    # Returns the df and a list of all of the possible column names
     return df, li_set
 
 
-# In[53]:
+# In[8]:
 
 
 if __name__ == '__main__':
