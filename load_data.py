@@ -98,13 +98,16 @@ def short_df(df, temp_df):
 
 
 def fix_date_index_write(all_df, arg_dict):
-    """Resets the index, changes Data_ to datetime format, and writes all_df to disk"""
-    
-    # reset the index
-    all_df.reset_index(inplace=True, drop=True)
+    """Changes Data_ to datetime format, resets the index, sorts based on Date_, and writes all_df to disk"""
 
     # Convert Date_ column to date
     all_df['Date_'] =  pd.to_datetime(all_df['Date_'], infer_datetime_format=True)
+    
+    # Sort based on Date_ then Country_Region
+    all_df = all_df.sort_values(['Date_', 'Country_Region'])
+    
+    # reset the index
+    all_df.reset_index(inplace=True, drop=True)
     
     # Write to disk
     all_df.to_csv(arg_dict['file_name_1'])
@@ -131,7 +134,7 @@ def driver(arg_dict):
     return df, li_set
 
 
-# In[8]:
+# In[ ]:
 
 
 if __name__ == '__main__':
