@@ -3,20 +3,22 @@
 
 # I want code that I can reuse for arbitrary jurisdictions that are contained in the John Hopkins data. Those 3 fields are Admin2, Province_State, and Country_Region.
 
-# In[1]:
+# In[204]:
 
 
 # import libraries
+from datetime import timedelta
 import matplotlib.pyplot as plt 
 plt.rcParams['figure.figsize'] = (12,8)
 import pandas as pd
 import numpy as np
+import seaborn as sb
 from statsmodels.graphics.tsaplots import plot_acf
 from statsmodels.graphics.tsaplots import plot_pacf
 from statsmodels.tsa.stattools import adfuller
 
 
-# In[2]:
+# In[205]:
 
 
 def data_merge(arg_dict):
@@ -38,7 +40,7 @@ def data_merge(arg_dict):
     return df_cc
 
 
-# In[3]:
+# In[206]:
 
 
 def restrict_column_place(df, arg_dict):
@@ -64,7 +66,15 @@ def restrict_column_place(df, arg_dict):
     return df_gb
 
 
-# In[4]:
+# Occasionally there are data corrections that occur. This causes downstream machine learning challenges with plotting and the ARIMA model. Deal with this here now, by taking the mean of the outliers on those dates.
+# 
+# If Daily_Deaths is negative, we have a problem. Take the average of the before Deaths row and the after Deaths row and use that as a plug value for the Deaths row where the Daily Deaths went negative.
+# 
+# We could fix this with a .apply. However, that would loop thru a million plus rows and would take a long time. Lets use vector operations with Pandas.
+# 
+# First identify all of the negative instances. Take those rows PLUS the row before and row after and put them in a new temporary dataframe. Put the row(s) back in the df.
+
+# In[207]:
 
 
 def data_clean(df, arg_dict):
@@ -73,10 +83,49 @@ def data_clean(df, arg_dict):
     # Nulls are not a challenge. However, there are parts of this dataset where deaths are 0
     df = df[df[arg_dict['dependent_variable']] != 0]
     
+    # Create a Daily Deaths column
+    df['Daily_Deaths'] = df[arg_dict['dependent_variable']] - df[arg_dict['dependent_variable']].shift()
+    
+    # Save the index 
+    df_index = df.index
+    
+    # Create a datetime index so that you can do date calculations
+    df.index = pd.to_datetime(df.index)
+    
+    # Restrict this to just the offending rows.
+    temp = df[df['Daily_Deaths'] < 0]
+    
+    print(temp)
+    
+    # Create a list with the offending dates.
+    row_index_list = []
+    for row in temp.itertuples():
+        row_index = row.Index
+        row_index_list.append(row_index)
+    
+    # Fix offending values
+    for idx in range(len(row_index_list)):
+    
+        # Get start and end dates of rows of interest
+        start_date_row = row_index_list[idx] - timedelta(days=1)
+        end_date_row = row_index_list[idx] + timedelta(days=1)
+
+        # Now that we have the rows, start the adjustments
+        temp2 = df.loc[start_date_row: end_date_row, :]
+
+        # Mean for Deaths
+        temp2.iloc[1,0] = (temp2.iloc[0,0] + temp2.iloc[2,0]) / 2
+        
+    # Put the string index back in place
+    df.index = df_index
+        
+    # Don't bother fixing Daily_Deaths. Just drop it.
+    df.drop('Daily_Deaths', axis=1, inplace=True) 
+    
     return df
 
 
-# In[5]:
+# In[208]:
 
 
 def load_prepare(df, arg_dict):
@@ -90,7 +139,7 @@ def load_prepare(df, arg_dict):
     return df[new_col][1:]
 
 
-# In[6]:
+# In[209]:
 
 
 def check_stationary(stationary, arg_dict):
@@ -106,6 +155,7 @@ def check_stationary(stationary, arg_dict):
 
     # plot differenced data
     stationary.plot()
+    plt.xlabel('Date')
     plt.ylabel(arg_dict['dependent_variable'])
     plt.title('Differenced Data')
     plt.show();
@@ -115,7 +165,7 @@ def check_stationary(stationary, arg_dict):
     
 
 
-# In[7]:
+# In[210]:
 
 
 def acf_pacf_plots(series):
@@ -129,7 +179,7 @@ def acf_pacf_plots(series):
     plt.show()
 
 
-# In[8]:
+# In[211]:
 
 
 def driver(arg_dict):
@@ -157,14 +207,14 @@ def driver(arg_dict):
     return df
 
 
-# In[9]:
+# In[212]:
 
 
 if __name__ == '__main__':
     
     # Prepare arguments for driver
     arg_dict = {'file_name_1': r'data\all_df.csv',
-                'file_name_2': r'C:\Users\linds\OneDrive\mystuff\GitHub\covid\data\country_codes_edited.csv',
+                'file_name_2': r'C:\Users\Lindsay Moir\OneDrive\Documents\GitHub\covid\data\country_codes_edited.csv',
                 'feature': 'Alpha_3',
                 'place': 'USA',
                 'dependent_variable': 'Deaths'}
