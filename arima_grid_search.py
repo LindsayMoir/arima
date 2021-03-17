@@ -3,7 +3,7 @@
 
 # This notebook grid searchs for the best model for ARIMA based on the dataset.
 
-# In[193]:
+# In[142]:
 
 
 # import libraries
@@ -13,29 +13,32 @@ from math import sqrt
 from sklearn.metrics import mean_squared_error
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.arima_model import ARIMAResults
-import warnings
+
+# Parallel Libraries
+from multiprocessing import cpu_count
+from joblib import Parallel, delayed
 
 # Regular libraries
+import itertools
 import numpy as np
 import pandas as pd
+import warnings
+warnings.filterwarnings("ignore")
 
 
-# In[194]:
+# In[143]:
 
 
-def evaluate_arima_model(X, arima_order):
-    """evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""    
+def evaluate_arima_model(args):
+    """evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
     
-    # prepare training dataset
-    X = X.astype('float32')
-    train_size = int(len(X) * 0.50)
-    train, test = X[0:train_size], X[train_size:]
-    history = [x for x in train]
+    # distribute args to appropriate variables
+    test, history, order = args
     
     # make predictions
     predictions = []
     for t in range(len(test)):
-        model = ARIMA(history, order=arima_order)
+        model = ARIMA(history, order=order)
         
         # fit model
         try:
@@ -47,36 +50,48 @@ def evaluate_arima_model(X, arima_order):
             continue
         
     # calculate out of sample error
-    rmse = sqrt(mean_squared_error(test, predictions))
+    try:
+        rmse = sqrt(mean_squared_error(test, predictions))
+        print('RMSE is', round(rmse,3), 'with ARIMA of', order)
     
-    return rmse
+    except Exception as e:
+        print(e)
+        print('Model did not fit/predict so unable to compute RMSE for order', order)
+        rmse = 999999
+    
+    return rmse, order
+    
 
 
-# In[195]:
+# In[144]:
 
 
-def evaluate_models(dataset, p_values, d_values, q_values):
+def evaluate_models(X, arima_list):
     """evaluate combinations of p, d and q values for an ARIMA model"""    
     
-    dataset = dataset.astype('float32')
+    # prepare training dataset
+    X = X.astype('float32')
+    train_size = int(len(X) * 0.50)
+    train, test = X[0:train_size], X[train_size:]
+    history = list(train)
     rmse_list = []
-
-    for p in p_values:
-        for d in d_values:
-            for q in q_values:
-                order = (p,d,q)
-                try:
-                    rmse = evaluate_arima_model(dataset, order)
-                    rmse_list.append((rmse, order))
-                    print('RMSE is', round(rmse,3), 'with ARIMA of', order)
-                except:
-                    continue
+    
+    # Need to create the same number of inputs for each argument into the parallel function
+    test_list = len(arima_list)*[X]
+    history_list = len(arima_list)*[history]
+    zip_list = list(zip(test_list, history_list, arima_list))
+    
+    # call function and run in parallel
+    rmse_list = Parallel(n_jobs=-1, verbose=10)(delayed(evaluate_arima_model)(args) for args in zip_list)
     
     # Sort the RMSEs
     rmse_list.sort(key=lambda tup: tup[0])
     
-    print('\nBest RMSE Score is {} with ARIMA of {}'.format(round(rmse_list[0][0],3), 
-                                                                      rmse_list[0][1]))
+    # Sometimes, we do not have any ARIMA models that successfully fit and predict.
+    try:
+        print(f'\nBest RMSE Score is {round(rmse_list[0][0],3)} with ARIMA of {rmse_list[0][1]}')
+    except:
+        print('No ARIMA models fit and predicted successfully. Try different p,d,q parameters')
     
     # We just need the order, not the RMSE
     order_list = [item[1] for item in rmse_list]
@@ -84,7 +99,7 @@ def evaluate_models(dataset, p_values, d_values, q_values):
     return order_list
 
 
-# In[196]:
+# In[145]:
 
 
 def driver(df, arg_dict):
@@ -96,13 +111,17 @@ def driver(df, arg_dict):
     p_values = arg_dict['p_values']
     d_values = arg_dict['d_values']
     q_values = arg_dict['q_values']
-    warnings.filterwarnings("ignore")
-    order_list = evaluate_models(series.values, p_values, d_values, q_values)
+    
+    # Generate all different combinations of p, d and q triplets
+    arima_list = list(itertools.product(p_values, d_values, q_values))
+    
+    # Grid search the possibilities
+    order_list = evaluate_models(series.values, arima_list)
     
     return order_list
 
 
-# In[197]:
+# In[146]:
 
 
 if __name__ == '__main__':
@@ -113,7 +132,7 @@ if __name__ == '__main__':
                 'file_name_2': r'C:\Users\linds\OneDrive\mystuff\GitHub\covid\data\country_codes_edited.csv',
                 'feature': 'Alpha_3',
                 'place': 'USA',
-                'dependent_variable': 'Confirmed',
+                'dependent_variable': 'Deaths',
                 'path': r'C:\Users\linds\OneDrive\mystuff\GitHub\COVID-19\csse_covid_19_data\csse_covid_19_daily_reports',
                 'p_values': range(0,2),
                 'd_values': range(0,2),
