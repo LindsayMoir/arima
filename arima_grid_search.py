@@ -3,7 +3,7 @@
 
 # This notebook grid searchs for the best model for ARIMA based on the dataset.
 
-# In[142]:
+# In[17]:
 
 
 # import libraries
@@ -26,11 +26,11 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# In[143]:
+# In[18]:
 
 
 def evaluate_arima_model(args):
-    """evaluate an ARIMA model for a given order (p,d,q) and return RMSE"""
+    """evaluate an ARIMA model for a given order (p,d,q) and return RMSE and order"""
     
     # distribute args to appropriate variables
     test, history, order = args
@@ -63,7 +63,7 @@ def evaluate_arima_model(args):
     
 
 
-# In[144]:
+# In[19]:
 
 
 def evaluate_models(X, arima_list):
@@ -92,14 +92,11 @@ def evaluate_models(X, arima_list):
         print(f'\nBest RMSE Score is {round(rmse_list[0][0],3)} with ARIMA of {rmse_list[0][1]}')
     except:
         print('No ARIMA models fit and predicted successfully. Try different p,d,q parameters')
-    
-    # We just need the order, not the RMSE
-    order_list = [item[1] for item in rmse_list]
 
-    return order_list
+    return rmse_list
 
 
-# In[145]:
+# In[20]:
 
 
 def driver(df, arg_dict):
@@ -116,12 +113,12 @@ def driver(df, arg_dict):
     arima_list = list(itertools.product(p_values, d_values, q_values))
     
     # Grid search the possibilities
-    order_list = evaluate_models(series.values, arima_list)
+    rmse_list = evaluate_models(series.values, arima_list)
     
-    return order_list
+    return rmse_list
 
 
-# In[146]:
+# In[21]:
 
 
 if __name__ == '__main__':
@@ -144,7 +141,11 @@ if __name__ == '__main__':
     df = pd.read_csv('df.csv')
     
     # Start driver
-    order_list = driver(df, arg_dict)
+    rmse_list = driver(df, arg_dict)
+    
+    # Create a df to display the rmse and pdq
+    rmse_order_df = pd.DataFrame({'RMSE': [x[0] for x in rmse_list], 'Order': [x[1] for x in rmse_list]})
+    print(rmse_order_df)
 
 
 # In[ ]:
