@@ -3,7 +3,7 @@
 
 # This notebook grid searchs for the best model for ARIMA based on the dataset.
 
-# In[17]:
+# In[1]:
 
 
 # import libraries
@@ -11,8 +11,8 @@
 # ARIMA libraries
 from math import sqrt
 from sklearn.metrics import mean_squared_error
-from statsmodels.tsa.arima_model import ARIMA
-from statsmodels.tsa.arima_model import ARIMAResults
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.arima.model import ARIMAResults
 
 # Parallel Libraries
 from multiprocessing import cpu_count
