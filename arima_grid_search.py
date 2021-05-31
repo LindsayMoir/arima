@@ -26,7 +26,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 
-# In[18]:
+# In[2]:
 
 
 def evaluate_arima_model(args):
@@ -42,13 +42,13 @@ def evaluate_arima_model(args):
         
         # fit model
         try:
-            model_fit = model.fit(trend='nc', disp=0)
+            model_fit = model.fit()
             yhat = model_fit.forecast()[0]
             predictions.append(yhat)
             history.append(test[t])
         except:
             continue
-        
+
     # calculate out of sample error
     try:
         rmse = sqrt(mean_squared_error(test, predictions))
@@ -59,15 +59,14 @@ def evaluate_arima_model(args):
         print('Model did not fit/predict so unable to compute RMSE for order', order)
         rmse = 999999
     
-    return rmse, order
-    
+    return (rmse, order)
 
 
-# In[19]:
+# In[4]:
 
 
 def evaluate_models(X, arima_list):
-    """evaluate combinations of p, d and q values for an ARIMA model"""    
+    """evaluate combinations of p, d and q values for an ARIMA model"""
     
     # prepare training dataset
     X = X.astype('float32')
@@ -83,7 +82,7 @@ def evaluate_models(X, arima_list):
     
     # call function and run in parallel
     rmse_list = Parallel(n_jobs=-1, verbose=10)(delayed(evaluate_arima_model)(args) for args in zip_list)
-    
+                   
     # Sort the RMSEs
     rmse_list.sort(key=lambda tup: tup[0])
     
@@ -92,11 +91,11 @@ def evaluate_models(X, arima_list):
         print(f'\nBest RMSE Score is {round(rmse_list[0][0],3)} with ARIMA of {rmse_list[0][1]}')
     except:
         print('No ARIMA models fit and predicted successfully. Try different p,d,q parameters')
-
+    
     return rmse_list
 
 
-# In[20]:
+# In[5]:
 
 
 def driver(df, arg_dict):
@@ -118,7 +117,7 @@ def driver(df, arg_dict):
     return rmse_list
 
 
-# In[21]:
+# In[6]:
 
 
 if __name__ == '__main__':
@@ -131,7 +130,7 @@ if __name__ == '__main__':
                 'place': 'USA',
                 'dependent_variable': 'Deaths',
                 'path': r'C:\Users\linds\OneDrive\mystuff\GitHub\COVID-19\csse_covid_19_data\csse_covid_19_daily_reports',
-                'p_values': range(0,2),
+                'p_values': range(1,5),
                 'd_values': range(0,2),
                 'q_values': range(0,2),
                 'split_value': .5,
